@@ -13,5 +13,5 @@
 // Tempo para o Pix "simulado" expirar, e tempo até a confirmação
 // automática simulada — só se aplica quando não há gateway real configurado
 // (ver src/lib/payments).
-export const MOCK_EXPIRATION_MS = 10 * 60 * 1000; // 10 minutos
+export const MOCK_EXPIRATION_MS = 15 * 60 * 1000; // 15 minutos
 export const MOCK_CONFIRMATION_DELAY_MS = 4000; // 4 segundos

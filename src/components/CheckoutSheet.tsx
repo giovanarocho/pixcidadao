@@ -9,6 +9,7 @@ type Phase = "email" | "loading" | "pending" | "paid" | "expired" | "error";
 interface CheckoutState {
   saleId: string | null;
   pixCopiaCola: string | null;
+  qrCodeBase64: string | null;
   expiraEm: string | null;
   downloadToken: string | null;
 }
@@ -32,6 +33,7 @@ export default function CheckoutSheet({
   const [state, setState] = useState<CheckoutState>({
     saleId: null,
     pixCopiaCola: null,
+    qrCodeBase64: null,
     expiraEm: null,
     downloadToken: null,
   });
@@ -80,6 +82,7 @@ export default function CheckoutSheet({
       setState({
         saleId: data.saleId,
         pixCopiaCola: data.pixCopiaCola,
+        qrCodeBase64: data.qrCodeBase64 ?? null,
         expiraEm: data.expiraEm,
         downloadToken: null,
       });
@@ -209,7 +212,16 @@ export default function CheckoutSheet({
               Escaneie o QR code ou copie o código abaixo no app do seu banco.
             </p>
             <div className="qr-box">
-              <div className="qr-mock" />
+              {state.qrCodeBase64 ? (
+                <img
+                  src={`data:image/png;base64,${state.qrCodeBase64}`}
+                  alt="QR code Pix"
+                  className="qr-real"
+                  style={{ width: "100%", maxWidth: 220, display: "block", margin: "0 auto" }}
+                />
+              ) : (
+                <div className="qr-mock" />
+              )}
               {secondsLeft !== null && <div className="timer">{timerLabel}</div>}
             </div>
             <div className="copy-row">

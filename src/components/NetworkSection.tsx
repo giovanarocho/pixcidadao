@@ -25,7 +25,6 @@ export default function NetworkSection() {
             </li>
           ))}
         </ul>
-        <span className="ref-pill">{network.refExample}</span>
         <div style={{ marginTop: 16 }}>
           <Link href="/seja-comunicador" className="btn btn-ghost">
             {network.ctaLabel}

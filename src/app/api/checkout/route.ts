@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       saleId: saleToken,
       pixCopiaCola: charge.pixCopiaCola,
+      qrCodeBase64: charge.qrCodeBase64 ?? null,
       expiraEm: charge.expiraEm,
       valorCentavos: site.priceCents,
     });

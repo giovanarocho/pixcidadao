@@ -278,7 +278,7 @@ export const legal: {
 
 export const contact = {
   email: "pix.cidadao@gmail.com",
-  instagram: "@pixcidadao",
+  instagram: "@pix.cidadao",
 };
 
 export const footer = {

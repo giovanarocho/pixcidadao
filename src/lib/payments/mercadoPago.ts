@@ -2,6 +2,12 @@ import type { CreatePixChargeParams, PaymentProvider, PixCharge } from "./types"
 
 const MP_API = "https://api.mercadopago.com/v1/payments";
 
+// Validade do código Pix: 15 minutos. Pedimos isso explicitamente ao
+// Mercado Pago na criação da cobrança em vez de depender do padrão deles
+// (que costuma ser bem maior) — um Pix "parado" esperando pagamento por
+// muito tempo não faz sentido para uma compra de e-book.
+const PIX_EXPIRATION_MINUTES = 15;
+
 /**
  * Provedor de pagamento real via Mercado Pago.
  *
@@ -33,6 +39,10 @@ export class MercadoPagoProvider implements PaymentProvider {
       );
     }
 
+    const dateOfExpiration = new Date(
+      Date.now() + PIX_EXPIRATION_MINUTES * 60 * 1000
+    ).toISOString();
+
     const response = await fetch(MP_API, {
       method: "POST",
       headers: {
@@ -48,6 +58,7 @@ export class MercadoPagoProvider implements PaymentProvider {
         payer: { email: payerEmail },
         notification_url: notificationUrl,
         external_reference: saleId,
+        date_of_expiration: dateOfExpiration,
       }),
       cache: "no-store",
     });
@@ -61,6 +72,8 @@ export class MercadoPagoProvider implements PaymentProvider {
     }
 
     const qrCode: string | undefined = data?.point_of_interaction?.transaction_data?.qr_code;
+    const qrCodeBase64: string | undefined =
+      data?.point_of_interaction?.transaction_data?.qr_code_base64;
     if (!qrCode) {
       throw new Error(
         "O Mercado Pago não devolveu um código Pix (qr_code) — confira se a " +
@@ -71,8 +84,8 @@ export class MercadoPagoProvider implements PaymentProvider {
     return {
       idTransacaoPix: String(data.id),
       pixCopiaCola: qrCode,
-      expiraEm:
-        data.date_of_expiration ?? new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      qrCodeBase64,
+      expiraEm: data.date_of_expiration ?? dateOfExpiration,
     };
   }
 }
