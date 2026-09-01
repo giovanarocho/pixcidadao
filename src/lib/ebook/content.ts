@@ -11,8 +11,11 @@
 export const site = {
   name: "Pix Cidadão",
   domain: "pixcidadao.app.br",
-  priceLabel: "R$ 37,90",
-  priceCents: 3790, // usado pela API/checkout — mantenha em sincronia com priceLabel
+  // TEMPORÁRIO: preço rebaixado para R$ 1,00 só para testar o Pix real sem
+  // gastar o valor cheio. Antes de divulgar para o público, volte para
+  // priceLabel: "R$ 37,90" e priceCents: 3790.
+  priceLabel: "R$ 1,00",
+  priceCents: 100, // usado pela API/checkout — mantenha em sincronia com priceLabel
   comissaoComunicadorPct: 90, // % do valor líquido destinado ao comunicador indicado
 };
 
