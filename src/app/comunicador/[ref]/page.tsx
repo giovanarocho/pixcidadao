@@ -76,7 +76,7 @@ export default async function PainelComunicador({
 
   const pagas = (vendas || []).filter((v) => v.status_pagamento === "pago");
   const totalComissao = pagas.reduce((acc, v) => acc + (v.comissao_valor_centavos || 0), 0);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pixcidadao.app.br";
   const linkIndicacao = `${siteUrl}/?ref=${ref}`;
 
   return (

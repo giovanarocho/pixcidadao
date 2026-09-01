@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { getSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isValidAdminPassword, dashboardTokenFor } from "@/lib/comunicadores/refCode";
-import { approveComunicador, rejectComunicador } from "./actions";
+import ComunicadoresPanel, { type ComunicadorRowData } from "./ComunicadoresPanel";
 
 export const metadata = { title: "Admin — Rede de Comunicadores" };
 export const dynamic = "force-dynamic";
@@ -93,7 +93,31 @@ export default async function AdminComunicadores({
   }
 
   const rows = (comunicadores || []) as ComunicadorRow[];
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  // Domínio usado para montar os links de indicação/painel. Enquanto o
+  // domínio oficial (pixcidadao.app.br) não está configurado na Vercel, dá
+  // pra sobrescrever com NEXT_PUBLIC_SITE_URL (ex.: a URL temporária do
+  // deploy) — mas o padrão já é o domínio definitivo, então nada precisa
+  // mudar aqui quando o domínio oficial entrar no ar.
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://pixcidadao.app.br";
+
+  const panelRows: ComunicadorRowData[] = rows.map((c) => {
+    const stats = comissaoPorRef.get(c.codigo_ref);
+    return {
+      id: c.id,
+      nome: c.nome,
+      email: c.email,
+      instagram: c.instagram,
+      chavePix: c.chave_pix,
+      status: c.status,
+      criadoEm: c.criado_em,
+      linkIndicacao: `${siteUrl}/?ref=${c.codigo_ref}`,
+      linkPainel: `${siteUrl}/comunicador/${c.codigo_ref}?token=${dashboardTokenFor(
+        c.codigo_ref
+      )}`,
+      vendasQtd: stats?.qtd || 0,
+      comissaoTotalCentavos: stats?.total || 0,
+    };
+  });
 
   return (
     <div style={pageStyle}>
@@ -103,75 +127,11 @@ export default async function AdminComunicadores({
         aprovação · {rows.length} cadastro(s) no total.
       </p>
 
-      {rows.length === 0 && <p>Nenhum cadastro ainda.</p>}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {rows.map((c) => {
-          const stats = comissaoPorRef.get(c.codigo_ref);
-          const linkIndicacao = `${siteUrl}/?ref=${c.codigo_ref}`;
-          const linkPainel = `${siteUrl}/comunicador/${c.codigo_ref}?token=${dashboardTokenFor(
-            c.codigo_ref
-          )}`;
-          return (
-            <div key={c.id} style={cardStyle}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div>
-                  <strong>{c.nome}</strong>{" "}
-                  <span style={badgeStyle(c.status)}>{c.status}</span>
-                  <div style={{ fontSize: 13, color: "#4b5d55" }}>{c.email}</div>
-                  {c.instagram && (
-                    <div style={{ fontSize: 13, color: "#4b5d55" }}>{c.instagram}</div>
-                  )}
-                  {c.chave_pix && (
-                    <div style={{ fontSize: 13, color: "#4b5d55" }}>
-                      Chave Pix: {c.chave_pix}
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-                  {c.status === "pendente" && (
-                    <>
-                      <form action={approveComunicador}>
-                        <input type="hidden" name="senha" value={senha} />
-                        <input type="hidden" name="id" value={c.id} />
-                        <button type="submit" style={buttonStyle}>
-                          Aprovar
-                        </button>
-                      </form>
-                      <form action={rejectComunicador}>
-                        <input type="hidden" name="senha" value={senha} />
-                        <input type="hidden" name="id" value={c.id} />
-                        <button type="submit" style={ghostButtonStyle}>
-                          Recusar
-                        </button>
-                      </form>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {c.status === "aprovado" && (
-                <div style={{ marginTop: 12, fontSize: 13 }}>
-                  <div>
-                    Vendas confirmadas: <strong>{stats?.qtd || 0}</strong> · Comissão
-                    acumulada:{" "}
-                    <strong>
-                      R$ {(((stats?.total || 0) / 100) as number).toFixed(2).replace(".", ",")}
-                    </strong>
-                  </div>
-                  <div style={{ marginTop: 6, wordBreak: "break-all" }}>
-                    Link de indicação: <code>{linkIndicacao}</code>
-                  </div>
-                  <div style={{ marginTop: 4, wordBreak: "break-all" }}>
-                    Link do painel (enviar para o comunicador):{" "}
-                    <code>{linkPainel}</code>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {rows.length === 0 ? (
+        <p>Nenhum cadastro ainda.</p>
+      ) : (
+        <ComunicadoresPanel senha={senha} rows={panelRows} />
+      )}
     </div>
   );
 }
@@ -182,13 +142,6 @@ const pageStyle: CSSProperties = {
   padding: "32px 20px 80px",
   fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
   color: "#12201a",
-};
-
-const cardStyle: CSSProperties = {
-  border: "1px solid #e4ece6",
-  borderRadius: 14,
-  padding: 16,
-  background: "#fff",
 };
 
 const inputStyle: CSSProperties = {
@@ -210,27 +163,3 @@ const buttonStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-const ghostButtonStyle: CSSProperties = {
-  ...buttonStyle,
-  background: "transparent",
-  color: "#b91c1c",
-  border: "1px solid #f3caca",
-};
-
-function badgeStyle(status: string): CSSProperties {
-  const colors: Record<string, { bg: string; fg: string }> = {
-    pendente: { bg: "#fef3c7", fg: "#92400e" },
-    aprovado: { bg: "#dcfce7", fg: "#166534" },
-    recusado: { bg: "#fee2e2", fg: "#991b1b" },
-  };
-  const c = colors[status] || colors.pendente;
-  return {
-    fontSize: 11,
-    fontWeight: 700,
-    background: c.bg,
-    color: c.fg,
-    padding: "2px 8px",
-    borderRadius: 999,
-    marginLeft: 6,
-  };
-}
