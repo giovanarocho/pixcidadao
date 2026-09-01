@@ -5,6 +5,10 @@ import { encodeSaleToken } from "@/lib/store/saleToken";
 import { site } from "@/lib/ebook/content";
 import { validarComunicadorAprovado, registrarVenda } from "@/lib/vendas";
 
+// Nunca cachear/pré-renderizar esta rota — cada compra precisa gerar uma
+// cobrança nova de verdade, nunca reaproveitar uma resposta antiga.
+export const dynamic = "force-dynamic";
+
 /**
  * Cria uma cobrança Pix (real ou simulada, conforme MERCADO_PAGO_ACCESS_TOKEN)
  * e devolve um "saleId" assinado, sem estado no servidor — ver

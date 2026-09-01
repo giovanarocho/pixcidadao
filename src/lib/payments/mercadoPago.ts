@@ -49,6 +49,7 @@ export class MercadoPagoProvider implements PaymentProvider {
         notification_url: notificationUrl,
         external_reference: saleId,
       }),
+      cache: "no-store",
     });
 
     const data = await response.json().catch(() => null);
@@ -108,6 +109,12 @@ export async function getMercadoPagoPayment(
 ): Promise<{ status: string; externalReference: string | null }> {
   const response = await fetch(`${MP_API}/${paymentId}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
+    // Crítico: o Next.js guarda respostas de fetch em cache por padrão.
+    // Essa consulta é sempre "esse pagamento já foi aprovado agora?" — nunca
+    // pode responder com um valor antigo guardado em cache, senão o site
+    // fica preso em "aguardando confirmação" mesmo depois do Pix ser pago de
+    // verdade (foi exatamente esse bug que aconteceu).
+    cache: "no-store",
   });
 
   if (!response.ok) {

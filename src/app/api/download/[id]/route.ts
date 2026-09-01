@@ -4,6 +4,10 @@ import path from "path";
 import { decodeSaleToken, downloadTokenFor } from "@/lib/store/saleToken";
 import { getMercadoPagoPaymentStatus } from "@/lib/payments/mercadoPago";
 
+// Nunca cachear/pré-renderizar esta rota — a confirmação do pagamento
+// precisa ser checada ao vivo antes de liberar o arquivo, sempre.
+export const dynamic = "force-dynamic";
+
 const MOCK_CONFIRMATION_DELAY_MS = 4000;
 
 /**

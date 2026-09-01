@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getMercadoPagoPayment } from "@/lib/payments/mercadoPago";
 import { atualizarStatusVendaPorId, atualizarStatusVendaPorTransacaoPix } from "@/lib/vendas";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Endpoint de webhook do Mercado Pago.
  *

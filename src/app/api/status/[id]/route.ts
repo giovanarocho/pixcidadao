@@ -3,6 +3,10 @@ import { decodeSaleToken, downloadTokenFor } from "@/lib/store/saleToken";
 import { getMercadoPagoPaymentStatus } from "@/lib/payments/mercadoPago";
 import { atualizarStatusVendaPorId } from "@/lib/vendas";
 
+// Nunca cachear/pré-renderizar esta rota — cada consulta precisa ir buscar o
+// status real na hora, nunca devolver um valor antigo guardado.
+export const dynamic = "force-dynamic";
+
 const MOCK_CONFIRMATION_DELAY_MS = 4000;
 
 /**
