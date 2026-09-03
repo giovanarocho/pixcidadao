@@ -36,5 +36,19 @@ export function getSupabaseServerClient() {
 
   return createClient(url, serviceKey, {
     auth: { persistSession: false },
+    global: {
+      // O Next.js (App Router, rodando na Vercel) "adota" a função fetch
+      // global e, por padrão, guarda em cache as respostas — inclusive as
+      // chamadas que o supabase-js faz por baixo dos panos (ele usa fetch
+      // para toda consulta). Isso pode fazer o painel mostrar uma
+      // "fotografia" antiga do banco (por exemplo, sempre a mesma
+      // quantidade de comunicadores) mesmo com `export const dynamic =
+      // "force-dynamic"` na página, porque esse cache fica guardado num
+      // nível separado (o "Data Cache" da Vercel), atrelado à própria
+      // chamada de rede, não à página. Forçando `cache: "no-store"` aqui,
+      // toda consulta ao Supabase feita a partir do servidor passa a
+      // buscar sempre o dado mais recente do banco.
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
   });
 }
