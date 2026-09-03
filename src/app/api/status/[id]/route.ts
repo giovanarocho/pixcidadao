@@ -40,18 +40,26 @@ export async function GET(
       const mpStatus = await getMercadoPagoPaymentStatus(decoded.mpPaymentId, accessToken);
 
       if (mpStatus === "approved") {
-        void atualizarStatusVendaPorId(decoded.id, "pago");
+        // IMPORTANTE: aguardamos (await) esta gravação antes de responder.
+        // Numa função serverless (Vercel), disparar isso "solto" (sem
+        // await) deixa a gravação vulnerável a nunca terminar — a
+        // Vercel pode encerrar a execução assim que a resposta é
+        // enviada, cortando a gravação no meio. Foi exatamente isso que
+        // fez uma venda aparecer certinho no Supabase (registrada), mas
+        // ficar presa em "pendente" para sempre, some do painel de
+        // comissões mesmo com o pagamento aprovado.
+        await atualizarStatusVendaPorId(decoded.id, "pago");
         return NextResponse.json({
           status: "pago",
           downloadToken: downloadTokenFor(decoded.id),
         });
       }
       if (["rejected", "cancelled", "refunded", "charged_back"].includes(mpStatus)) {
-        void atualizarStatusVendaPorId(decoded.id, "cancelado");
+        await atualizarStatusVendaPorId(decoded.id, "cancelado");
         return NextResponse.json({ status: "cancelado", downloadToken: null });
       }
       if (Date.now() > decoded.expiresAt) {
-        void atualizarStatusVendaPorId(decoded.id, "expirado");
+        await atualizarStatusVendaPorId(decoded.id, "expirado");
         return NextResponse.json({ status: "expirado", downloadToken: null });
       }
       return NextResponse.json({ status: "pendente", downloadToken: null });
@@ -67,11 +75,11 @@ export async function GET(
   // Modo simulado
   const now = Date.now();
   if (now > decoded.expiresAt) {
-    void atualizarStatusVendaPorId(decoded.id, "expirado");
+    await atualizarStatusVendaPorId(decoded.id, "expirado");
     return NextResponse.json({ status: "expirado", downloadToken: null });
   }
   if (now - decoded.createdAt >= MOCK_CONFIRMATION_DELAY_MS) {
-    void atualizarStatusVendaPorId(decoded.id, "pago");
+    await atualizarStatusVendaPorId(decoded.id, "pago");
     return NextResponse.json({
       status: "pago",
       downloadToken: downloadTokenFor(decoded.id),

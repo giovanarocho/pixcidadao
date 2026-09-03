@@ -3,6 +3,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { decodeSaleToken, downloadTokenFor } from "@/lib/store/saleToken";
 import { getMercadoPagoPaymentStatus } from "@/lib/payments/mercadoPago";
+import { atualizarStatusVendaPorId } from "@/lib/vendas";
 
 // Nunca cachear/pré-renderizar esta rota — a confirmação do pagamento
 // precisa ser checada ao vivo antes de liberar o arquivo, sempre.
@@ -67,6 +68,13 @@ export async function GET(
       { status: 402 }
     );
   }
+
+  // Rede de segurança: garante que o Supabase fique marcado como "pago"
+  // mesmo que a atualização feita durante o polling em /api/status tenha
+  // falhado por algum motivo (ex.: a aba foi fechada bem na hora da
+  // confirmação). Idempotente — atualizar de novo uma venda que já está
+  // "pago" não tem efeito colateral nenhum.
+  await atualizarStatusVendaPorId(decoded.id, "pago");
 
   const filePath = path.join(process.cwd(), "src/private-content/ebook.pdf");
   const file = await readFile(filePath);

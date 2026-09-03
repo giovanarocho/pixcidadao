@@ -63,10 +63,13 @@ export async function POST(req: NextRequest) {
       expiresAt: new Date(charge.expiraEm).getTime(),
     });
 
-    // Registro para a Rede de Comunicadores (histórico/comissão) — nunca
-    // bloqueia nem atrasa a resposta ao comprador se falhar (ver
-    // src/lib/vendas.ts).
-    void registrarVenda({
+    // Registro para a Rede de Comunicadores (histórico/comissão). Aguardamos
+    // (await) esta gravação terminar antes de responder — numa função
+    // serverless (Vercel), disparar isso "solto" arrisca a Vercel encerrar a
+    // execução assim que a resposta é enviada, cortando a gravação no meio.
+    // Falhas aqui nunca bloqueiam nem atrasam a resposta ao comprador (ver
+    // src/lib/vendas.ts — todo erro é só logado, nunca propagado).
+    await registrarVenda({
       id,
       comunicadorRef: refValidado,
       compradorEmail: email,
