@@ -73,7 +73,7 @@ export default async function AdminComunicadores({
   }
 
   const supabase = getSupabaseServerClient();
-  const { data: comunicadores } = await supabase
+  const { data: comunicadores, error: erroComunicadores } = await supabase
     .from("comunicadores")
     .select("id, nome, email, instagram, chave_pix, codigo_ref, status, criado_em")
     .order("status", { ascending: true })
@@ -135,6 +135,25 @@ export default async function AdminComunicadores({
         {rows.filter((r) => r.status === "pendente").length} pendente(s) de
         aprovação · {rows.length} cadastro(s) no total.
       </p>
+
+      {erroComunicadores && (
+        <div
+          style={{
+            background: "#fee2e2",
+            color: "#991b1b",
+            padding: "10px 14px",
+            borderRadius: 10,
+            fontSize: 13,
+            marginBottom: 20,
+            fontFamily: "monospace",
+            wordBreak: "break-word",
+          }}
+        >
+          Erro ao consultar o Supabase: {erroComunicadores.message}
+          {erroComunicadores.hint ? ` — ${erroComunicadores.hint}` : ""}
+          {erroComunicadores.code ? ` (código ${erroComunicadores.code})` : ""}
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <p>Nenhum cadastro ainda.</p>
