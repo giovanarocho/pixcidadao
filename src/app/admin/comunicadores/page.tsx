@@ -79,20 +79,6 @@ export default async function AdminComunicadores({
     .order("status", { ascending: true })
     .order("criado_em", { ascending: false });
 
-  // Diagnóstico temporário — aparece nos "Runtime Logs" da Vercel (não na
-  // tela do site), pra descobrir por que a contagem de comunicadores está
-  // vindo diferente do banco. Remover depois de resolvido.
-  console.log(
-    "[admin/comunicadores] url:",
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    "| linhas recebidas:",
-    comunicadores?.length,
-    "| erro:",
-    erroComunicadores,
-    "| horário da consulta:",
-    new Date().toISOString()
-  );
-
   const { data: vendasPagas } = await supabase
     .from("vendas")
     .select("comunicador_ref, comissao_valor_centavos")
