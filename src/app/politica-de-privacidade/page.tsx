@@ -1,14 +1,16 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { legal } from "@/lib/ebook/content";
+import { getSiteContent } from "@/lib/ebook/getContent";
 
 export const metadata = { title: "Política de Privacidade — Pix Cidadão" };
+export const dynamic = "force-dynamic";
 
-export default function PoliticaDePrivacidade() {
+export default async function PoliticaDePrivacidade() {
+  const { site, footer, contact, legal } = await getSiteContent();
   return (
     <div className="wrap">
-      <Header />
+      <Header siteName={site.name} />
       <div className="legal-page">
         <Link href="/" className="back-link">
           ← Voltar
@@ -24,18 +26,25 @@ export default function PoliticaDePrivacidade() {
             {section.paragraphs.map((p) => (
               <p key={p}>{p}</p>
             ))}
-            {section.bullets && (
+            {section.bullets && section.bullets.length > 0 && (
               <ul>
                 {section.bullets.map((b) => (
                   <li key={b}>{b}</li>
                 ))}
               </ul>
             )}
-            {section.footer && <p>{section.footer}</p>}
+            {section.footer && section.footer.trim() && <p>{section.footer}</p>}
           </div>
         ))}
       </div>
-      <Footer />
+      <Footer
+        siteName={site.name}
+        footerText={footer.text}
+        creditText={footer.credit.text}
+        creditLabel={footer.credit.label}
+        creditHref={footer.credit.href}
+        contactEmail={contact.email}
+      />
     </div>
   );
 }

@@ -39,6 +39,16 @@ create index if not exists vendas_comunicador_ref_idx on public.vendas (comunica
 create index if not exists vendas_status_idx on public.vendas (status_pagamento);
 create index if not exists vendas_id_transacao_pix_idx on public.vendas (id_transacao_pix);
 
+-- Conteúdo editável do site (textos e preço), editado pelo admin em
+-- /admin/site. Uma única linha (id = 'default') guarda um JSON com tudo
+-- que foi customizado — o que não foi customizado continua usando o
+-- padrão de src/lib/ebook/content.ts (ver src/lib/ebook/getContent.ts).
+create table if not exists public.conteudo_site (
+  id text primary key default 'default',
+  dados jsonb not null default '{}'::jsonb,
+  atualizado_em timestamptz not null default now()
+);
+
 -- Segurança: habilita Row Level Security e não cria nenhuma política.
 -- Resultado: só a service role key (usada exclusivamente no servidor, nunca
 -- no navegador) consegue ler/gravar nessas tabelas — a chave pública
@@ -47,3 +57,4 @@ create index if not exists vendas_id_transacao_pix_idx on public.vendas (id_tran
 -- navegador do visitante.
 alter table public.comunicadores enable row level security;
 alter table public.vendas enable row level security;
+alter table public.conteudo_site enable row level security;

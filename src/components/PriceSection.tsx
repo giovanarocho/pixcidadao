@@ -1,15 +1,23 @@
 "use client";
 
-import { priceSection, site } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import { CheckIcon, PixIcon } from "./Icons";
 
-export default function PriceSection({ onBuy }: { onBuy: () => void }) {
+export default function PriceSection({
+  onBuy,
+  priceSection,
+  priceLabel,
+}: {
+  onBuy: () => void;
+  priceSection: SiteContent["priceSection"];
+  priceLabel: string;
+}) {
   return (
     <section className="price-section">
       <div className="price-inner">
         <div className="price-tag">{priceSection.tag}</div>
         <div className="price-row">
-          <span className="price-value">{site.priceLabel}</span>
+          <span className="price-value">{priceLabel}</span>
           <span className="price-old">pagamento único</span>
         </div>
         <p className="price-note">{priceSection.note}</p>

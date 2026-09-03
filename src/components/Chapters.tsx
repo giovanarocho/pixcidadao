@@ -1,6 +1,6 @@
-import { chapters } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 
-export default function Chapters() {
+export default function Chapters({ chapters }: { chapters: SiteContent["chapters"] }) {
   return (
     <section className="section" style={{ paddingTop: 6 }}>
       <h2 className="section-title">O que o e-book apresenta</h2>

@@ -1,14 +1,16 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { legal } from "@/lib/ebook/content";
+import { getSiteContent } from "@/lib/ebook/getContent";
 
 export const metadata = { title: "Termos de Uso — Pix Cidadão" };
+export const dynamic = "force-dynamic";
 
-export default function TermosDeUso() {
+export default async function TermosDeUso() {
+  const { site, footer, contact, legal } = await getSiteContent();
   return (
     <div className="wrap">
-      <Header />
+      <Header siteName={site.name} />
       <div className="legal-page">
         <Link href="/" className="back-link">
           ← Voltar
@@ -25,7 +27,14 @@ export default function TermosDeUso() {
           </div>
         ))}
       </div>
-      <Footer />
+      <Footer
+        siteName={site.name}
+        footerText={footer.text}
+        creditText={footer.credit.text}
+        creditLabel={footer.credit.label}
+        creditHref={footer.credit.href}
+        contactEmail={contact.email}
+      />
     </div>
   );
 }

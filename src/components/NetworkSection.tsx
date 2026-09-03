@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { network } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import { CheckIcon } from "./Icons";
 
-export default function NetworkSection() {
+export default function NetworkSection({ network }: { network: SiteContent["network"] }) {
   return (
     <section className="section" style={{ paddingTop: 6 }}>
       <h2 className="section-title">{network.title}</h2>

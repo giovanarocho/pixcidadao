@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import { getSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isValidAdminPassword, dashboardTokenFor } from "@/lib/comunicadores/refCode";
 import ComunicadoresPanel, { type ComunicadorRowData } from "./ComunicadoresPanel";
@@ -121,8 +122,16 @@ export default async function AdminComunicadores({
 
   return (
     <div style={pageStyle}>
-      <h1>Rede de Comunicadores — Admin</h1>
-      <p style={{ color: "#4b5d55", marginBottom: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <h1 style={{ margin: 0 }}>Rede de Comunicadores — Admin</h1>
+        <Link
+          href={`/admin/site?senha=${encodeURIComponent(senha)}`}
+          style={editSiteButtonStyle}
+        >
+          Editar site
+        </Link>
+      </div>
+      <p style={{ color: "#4b5d55", marginTop: 10, marginBottom: 24 }}>
         {rows.filter((r) => r.status === "pendente").length} pendente(s) de
         aprovação · {rows.length} cadastro(s) no total.
       </p>
@@ -161,5 +170,18 @@ const buttonStyle: CSSProperties = {
   fontWeight: 700,
   fontSize: 13,
   cursor: "pointer",
+};
+
+const editSiteButtonStyle: CSSProperties = {
+  padding: "9px 16px",
+  borderRadius: 10,
+  border: "1px solid #e4ece6",
+  background: "#fff",
+  color: "#12201a",
+  fontWeight: 700,
+  fontSize: 12.5,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
 };
 

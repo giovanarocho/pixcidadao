@@ -1,14 +1,16 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { contact } from "@/lib/ebook/content";
+import { getSiteContent } from "@/lib/ebook/getContent";
 
 export const metadata = { title: "Contato — Pix Cidadão" };
+export const dynamic = "force-dynamic";
 
-export default function Contato() {
+export default async function Contato() {
+  const { site, footer, contact } = await getSiteContent();
   return (
     <div className="wrap">
-      <Header />
+      <Header siteName={site.name} />
       <div className="legal-page">
         <Link href="/" className="back-link">
           ← Voltar
@@ -24,7 +26,14 @@ export default function Contato() {
         </ul>
         <p>Respondemos, em média, em até 2 dias úteis.</p>
       </div>
-      <Footer />
+      <Footer
+        siteName={site.name}
+        footerText={footer.text}
+        creditText={footer.credit.text}
+        creditLabel={footer.credit.label}
+        creditHref={footer.credit.href}
+        contactEmail={contact.email}
+      />
     </div>
   );
 }

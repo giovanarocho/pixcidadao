@@ -2,7 +2,7 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getPaymentProvider } from "@/lib/payments";
 import { encodeSaleToken } from "@/lib/store/saleToken";
-import { site } from "@/lib/ebook/content";
+import { getSiteContent } from "@/lib/ebook/getContent";
 import { validarComunicadorAprovado, registrarVenda } from "@/lib/vendas";
 
 // Nunca cachear/pré-renderizar esta rota — cada compra precisa gerar uma
@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Preço lido ao vivo (nunca de um valor "engessado" no código) — se o
+    // admin editou o preço em /admin/site, a cobrança já sai com o valor
+    // novo, sem precisar de deploy.
+    const { site } = await getSiteContent();
 
     // Só aplica comissão se o código de indicação pertencer a um comunicador
     // com cadastro aprovado — evita que qualquer ?ref= arbitrário na URL

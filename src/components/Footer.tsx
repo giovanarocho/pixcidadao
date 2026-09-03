@@ -1,17 +1,30 @@
 import Link from "next/link";
-import { site, footer, contact } from "@/lib/ebook/content";
 
-export default function Footer() {
+export default function Footer({
+  siteName,
+  footerText,
+  creditText,
+  creditLabel,
+  creditHref,
+  contactEmail,
+}: {
+  siteName: string;
+  footerText: string;
+  creditText: string;
+  creditLabel: string;
+  creditHref: string;
+  contactEmail: string;
+}) {
   return (
     <footer className="site-footer">
       <div className="footer-logo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-mark.png" alt="" className="logo-mark-img" width={22} height={22} />
-        {site.name}
+        {siteName}
       </div>
-      <p className="small">{footer.text}</p>
-      <a className="footer-email" href={`mailto:${contact.email}`}>
-        {contact.email}
+      <p className="small">{footerText}</p>
+      <a className="footer-email" href={`mailto:${contactEmail}`}>
+        {contactEmail}
       </a>
       <div className="footer-links">
         <Link href="/politica-de-privacidade">Política de Privacidade</Link>
@@ -19,13 +32,13 @@ export default function Footer() {
         <Link href="/contato">Contato</Link>
       </div>
       <div className="footer-bottom">
-        © {new Date().getFullYear()} {site.name}. Todos os direitos
+        © {new Date().getFullYear()} {siteName}. Todos os direitos
         reservados.
       </div>
       <div className="footer-credit">
-        {footer.credit.text}{" "}
-        <a href={footer.credit.href} target="_blank" rel="noopener noreferrer">
-          {footer.credit.label}
+        {creditText}{" "}
+        <a href={creditHref} target="_blank" rel="noopener noreferrer">
+          {creditLabel}
         </a>
       </div>
     </footer>

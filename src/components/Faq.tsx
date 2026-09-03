@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { faq } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import { ChevronIcon } from "./Icons";
 
-export default function Faq() {
+export default function Faq({ faq }: { faq: SiteContent["faq"] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

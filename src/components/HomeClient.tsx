@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import Header from "./Header";
 import Hero from "./Hero";
 import Features from "./Features";
@@ -16,7 +17,7 @@ import CheckoutSheet from "./CheckoutSheet";
 const REF_STORAGE_KEY = "pixcidadao_ref";
 const REF_STORAGE_DAYS = 30;
 
-export default function HomeClient() {
+export default function HomeClient({ content }: { content: SiteContent }) {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [refCode, setRefCode] = useState<string | null>(null);
 
@@ -60,23 +61,42 @@ export default function HomeClient() {
     }
   }, []);
 
+  const { site, hero, features, chapters, priceSection, impact, network, faq, footer, contact } =
+    content;
+
   return (
     <div className="wrap">
-      <Header />
-      <Hero onBuy={() => setCheckoutOpen(true)} />
+      <Header siteName={site.name} />
+      <Hero onBuy={() => setCheckoutOpen(true)} hero={hero} priceLabel={site.priceLabel} />
       <hr className="divider" />
-      <Features />
-      <Chapters />
-      <PriceSection onBuy={() => setCheckoutOpen(true)} />
-      <ImpactSection />
-      <NetworkSection />
-      <Faq />
-      <Footer />
-      <StickyBuyBar onBuy={() => setCheckoutOpen(true)} />
+      <Features features={features} />
+      <Chapters chapters={chapters} />
+      <PriceSection
+        onBuy={() => setCheckoutOpen(true)}
+        priceSection={priceSection}
+        priceLabel={site.priceLabel}
+      />
+      <ImpactSection impact={impact} />
+      <NetworkSection network={network} />
+      <Faq faq={faq} />
+      <Footer
+        siteName={site.name}
+        footerText={footer.text}
+        creditText={footer.credit.text}
+        creditLabel={footer.credit.label}
+        creditHref={footer.credit.href}
+        contactEmail={contact.email}
+      />
+      <StickyBuyBar
+        onBuy={() => setCheckoutOpen(true)}
+        siteName={site.name}
+        priceLabel={site.priceLabel}
+      />
       <CheckoutSheet
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         refCode={refCode}
+        priceLabel={site.priceLabel}
       />
     </div>
   );

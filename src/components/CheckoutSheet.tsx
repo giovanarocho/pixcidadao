@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { XIcon, CheckBigIcon, DownloadIcon, AlertIcon } from "./Icons";
-import { site } from "@/lib/ebook/content";
 
 type Phase = "email" | "loading" | "pending" | "paid" | "expired" | "error";
 
@@ -21,10 +20,12 @@ export default function CheckoutSheet({
   open,
   onClose,
   refCode,
+  priceLabel,
 }: {
   open: boolean;
   onClose: () => void;
   refCode: string | null;
+  priceLabel: string;
 }) {
   const [phase, setPhase] = useState<Phase>("email");
   const [email, setEmail] = useState("");
@@ -187,7 +188,7 @@ export default function CheckoutSheet({
             )}
             {!(emailTouched && !emailIsValid) && <div style={{ marginBottom: 12 }} />}
             <button className="btn btn-primary" type="submit">
-              Gerar Pix · {site.priceLabel}
+              Gerar Pix · {priceLabel}
             </button>
             <p style={{ fontSize: 11.5, color: "var(--ink-soft)", textAlign: "center", marginTop: 14 }}>
               Usamos seu e-mail só para enviar o link do e-book e dar suporte,

@@ -151,6 +151,24 @@ Sem essas variáveis configuradas, o e-book continua vendendo normalmente —
 só a Rede de Comunicadores fica indisponível (o site avisa isso, não quebra
 nada).
 
+## Editando o texto e o preço do site (sem precisar de deploy)
+
+Em `SEU_SITE/admin/site?senha=SUA_SENHA` (tem um botão "Editar site" dentro
+do painel de comunicadores que já leva pra lá) dá pra editar todo o texto
+do site — inclusive o preço do e-book — e a alteração aparece no site na
+hora, sem precisar subir código nem fazer redeploy.
+
+Isso usa a mesma tabela do Supabase da Rede de Comunicadores, só que uma
+nova (`conteudo_site`). Se o seu projeto no Supabase já estava rodando
+antes dessa funcionalidade existir, é só rodar de novo o arquivo
+`supabase-schema.sql` inteiro no SQL Editor (Run) — `create table if not
+exists` não duplica nem apaga o que já existe, só cria a tabela nova que
+está faltando. Sem isso, a página de edição abre normalmente, mas o botão
+"Salvar alterações" mostra um erro.
+
+Se nunca nada for editado ali, o site mostra o texto padrão que já vem no
+código (`src/lib/ebook/content.ts`).
+
 ## Segurança e LGPD — resumo
 
 - Pagamento processado exclusivamente pelo Mercado Pago (instituição

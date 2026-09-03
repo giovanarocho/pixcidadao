@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { getSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { dashboardTokenFor } from "@/lib/comunicadores/refCode";
+import { getSiteContent } from "@/lib/ebook/getContent";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -18,10 +19,20 @@ export default async function PainelComunicador({
   const token = searchParams.token || "";
   const valid = token && token === dashboardTokenFor(ref);
 
+  const { site, footer, contact } = await getSiteContent();
+  const headerFooterProps = {
+    siteName: site.name,
+    footerText: footer.text,
+    creditText: footer.credit.text,
+    creditLabel: footer.credit.label,
+    creditHref: footer.credit.href,
+    contactEmail: contact.email,
+  };
+
   if (!valid) {
     return (
       <div className="wrap">
-        <Header />
+        <Header siteName={site.name} />
         <div className="legal-page">
           <h1>Link inválido</h1>
           <p>
@@ -29,7 +40,7 @@ export default async function PainelComunicador({
             correto para a equipe do Pix Cidadão.
           </p>
         </div>
-        <Footer />
+        <Footer {...headerFooterProps} />
       </div>
     );
   }
@@ -37,12 +48,12 @@ export default async function PainelComunicador({
   if (!isSupabaseConfigured()) {
     return (
       <div className="wrap">
-        <Header />
+        <Header siteName={site.name} />
         <div className="legal-page">
           <h1>Painel indisponível</h1>
           <p>O painel de comunicadores ainda está sendo configurado. Tente novamente mais tarde.</p>
         </div>
-        <Footer />
+        <Footer {...headerFooterProps} />
       </div>
     );
   }
@@ -57,12 +68,12 @@ export default async function PainelComunicador({
   if (!comunicador || comunicador.status !== "aprovado") {
     return (
       <div className="wrap">
-        <Header />
+        <Header siteName={site.name} />
         <div className="legal-page">
           <h1>Cadastro não aprovado</h1>
           <p>Este cadastro ainda não foi aprovado ou não existe mais.</p>
         </div>
-        <Footer />
+        <Footer {...headerFooterProps} />
       </div>
     );
   }
@@ -81,7 +92,7 @@ export default async function PainelComunicador({
 
   return (
     <div className="wrap">
-      <Header />
+      <Header siteName={site.name} />
       <div className="legal-page">
         <h1>Olá, {comunicador.nome.split(" ")[0]}</h1>
         <p className="updated">Seu painel de vendas pela Rede de Comunicadores</p>
@@ -129,7 +140,7 @@ export default async function PainelComunicador({
           </div>
         ))}
       </div>
-      <Footer />
+      <Footer {...headerFooterProps} />
     </div>
   );
 }

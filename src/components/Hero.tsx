@@ -1,9 +1,17 @@
 "use client";
 
-import { hero, site } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import { ShieldIcon, BoltIcon, LockIcon } from "./Icons";
 
-export default function Hero({ onBuy }: { onBuy: () => void }) {
+export default function Hero({
+  onBuy,
+  hero,
+  priceLabel,
+}: {
+  onBuy: () => void;
+  hero: SiteContent["hero"];
+  priceLabel: string;
+}) {
   return (
     <section className="hero">
       <span className="eyebrow">
@@ -18,7 +26,7 @@ export default function Hero({ onBuy }: { onBuy: () => void }) {
       <p className="lede">{hero.lede}</p>
       <div className="hero-actions">
         <button className="btn btn-primary" onClick={onBuy}>
-          {hero.ctaPrimary} · {site.priceLabel}
+          {hero.ctaPrimary} · {priceLabel}
         </button>
         <a href="#sobre" className="btn btn-ghost">
           {hero.ctaSecondary}

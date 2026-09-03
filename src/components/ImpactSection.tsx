@@ -1,7 +1,7 @@
-import { impact } from "@/lib/ebook/content";
+import type { SiteContent } from "@/lib/ebook/getContent";
 import { HeartIcon } from "./Icons";
 
-export default function ImpactSection() {
+export default function ImpactSection({ impact }: { impact: SiteContent["impact"] }) {
   const parts = impact.text.split(`{${impact.highlight}}`);
   return (
     <section className="section" style={{ paddingTop: 6 }}>
