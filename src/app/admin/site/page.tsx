@@ -2,7 +2,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { isValidAdminPassword } from "@/lib/comunicadores/refCode";
 import { getSiteContent } from "@/lib/ebook/getContent";
-import { salvarConteudoSite } from "./actions";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { salvarConteudoSite, atualizarEbookPdf } from "./actions";
 
 export const metadata = { title: "Editar site — Pix Cidadão" };
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function EditarSite({
   searchParams,
 }: {
-  searchParams: { senha?: string; salvo?: string; erro?: string };
+  searchParams: { senha?: string; salvo?: string; erro?: string; ebook_salvo?: string };
 }) {
   const senha = searchParams.senha || "";
   const authorized = isValidAdminPassword(senha);
@@ -67,6 +68,12 @@ export default async function EditarSite({
       {searchParams.salvo && (
         <div style={bannerStyle("#dcfce7", "#166534")}>Alterações salvas com sucesso.</div>
       )}
+      {searchParams.ebook_salvo && (
+        <div style={bannerStyle("#dcfce7", "#166534")}>
+          E-book atualizado com sucesso — as próximas vendas já entregam o
+          arquivo novo.
+        </div>
+      )}
       {searchParams.erro === "preco" && (
         <div style={bannerStyle("#fee2e2", "#991b1b")}>
           Preço inválido — digite um valor tipo <code>37,90</code>. Nada foi salvo.
@@ -77,6 +84,51 @@ export default async function EditarSite({
           Não foi possível salvar agora. Tente de novo em instantes.
         </div>
       )}
+      {searchParams.erro === "sem_supabase" && (
+        <div style={bannerStyle("#fee2e2", "#991b1b")}>
+          O Supabase ainda não está configurado neste projeto — configure
+          antes de editar o texto ou trocar o e-book (veja o README).
+        </div>
+      )}
+      {searchParams.erro === "ebook_vazio" && (
+        <div style={bannerStyle("#fee2e2", "#991b1b")}>
+          Escolha um arquivo antes de clicar em atualizar. Nada foi salvo.
+        </div>
+      )}
+      {searchParams.erro === "ebook_tipo" && (
+        <div style={bannerStyle("#fee2e2", "#991b1b")}>
+          O arquivo precisa ser um PDF (.pdf). Nada foi salvo.
+        </div>
+      )}
+      {searchParams.erro === "ebook_salvar" && (
+        <div style={bannerStyle("#fee2e2", "#991b1b")}>
+          Não foi possível enviar o arquivo agora. Tente de novo em instantes.
+        </div>
+      )}
+
+      <div style={sectionStyle}>
+        <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 12 }}>
+          Arquivo do e-book (PDF)
+        </div>
+        {isSupabaseConfigured() ? (
+          <form action={atualizarEbookPdf} style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <input type="hidden" name="senha" value={senha} />
+            <input type="file" name="ebook" accept="application/pdf,.pdf" required style={{ flex: 1, minWidth: 200 }} />
+            <button type="submit" style={buttonStyle}>
+              Atualizar e-book
+            </button>
+          </form>
+        ) : (
+          <p style={helpTextStyle}>
+            Configure o Supabase (veja o README) para poder trocar o arquivo
+            do e-book por aqui.
+          </p>
+        )}
+        <p style={{ ...helpTextStyle, marginTop: 10 }}>
+          O arquivo enviado aqui passa a ser entregue em toda venda nova, na
+          hora — sem precisar de deploy. Tamanho máximo: 20 MB.
+        </p>
+      </div>
 
       <form action={salvarConteudoSite}>
         <input type="hidden" name="senha" value={senha} />

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getSupabaseServerClient } from "@/lib/supabase/client";
+import { getSupabaseServerClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { isValidAdminPassword } from "@/lib/comunicadores/refCode";
 import { DEFAULT_CONTENT } from "@/lib/ebook/getContent";
 
@@ -16,6 +16,46 @@ function requireAdmin(formData: FormData): string {
 
 function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
+}
+
+/**
+ * Troca o arquivo do e-book (PDF) — guardado no bucket privado "ebooks" do
+ * Supabase Storage, sempre com o mesmo nome ("ebook.pdf"), então o novo
+ * arquivo já é servido na próxima venda, sem precisar de deploy nem mudar
+ * nenhum link já enviado a ninguém. Ver src/app/api/download/[id]/route.ts.
+ */
+export async function atualizarEbookPdf(formData: FormData): Promise<void> {
+  const senha = requireAdmin(formData);
+
+  if (!isSupabaseConfigured()) {
+    redirect(`/admin/site?senha=${encodeURIComponent(senha)}&erro=sem_supabase`);
+  }
+
+  const arquivo = formData.get("ebook");
+  if (!(arquivo instanceof File) || arquivo.size === 0) {
+    redirect(`/admin/site?senha=${encodeURIComponent(senha)}&erro=ebook_vazio`);
+  }
+
+  const arquivoValido = arquivo as File;
+  const nomeEhPdf = arquivoValido.name.toLowerCase().endsWith(".pdf");
+  const tipoEhPdf = !arquivoValido.type || arquivoValido.type === "application/pdf";
+  if (!nomeEhPdf || !tipoEhPdf) {
+    redirect(`/admin/site?senha=${encodeURIComponent(senha)}&erro=ebook_tipo`);
+  }
+
+  const supabase = getSupabaseServerClient();
+  const bytes = await arquivoValido.arrayBuffer();
+  const { error } = await supabase.storage.from("ebooks").upload("ebook.pdf", bytes, {
+    contentType: "application/pdf",
+    upsert: true,
+  });
+
+  if (error) {
+    console.error("Erro ao enviar o e-book para o Supabase Storage:", error);
+    redirect(`/admin/site?senha=${encodeURIComponent(senha)}&erro=ebook_salvar`);
+  }
+
+  redirect(`/admin/site?senha=${encodeURIComponent(senha)}&ebook_salvo=1`);
 }
 
 // Textarea com uma linha por item (usado para listas curtas: bullets,
@@ -57,6 +97,10 @@ function parsePrecoReais(raw: string): { priceCents: number; priceLabel: string 
  */
 export async function salvarConteudoSite(formData: FormData): Promise<void> {
   const senha = requireAdmin(formData);
+
+  if (!isSupabaseConfigured()) {
+    redirect(`/admin/site?senha=${encodeURIComponent(senha)}&erro=sem_supabase`);
+  }
 
   const preco = parsePrecoReais(str(formData, "site_price_reais"));
   if (!preco) {

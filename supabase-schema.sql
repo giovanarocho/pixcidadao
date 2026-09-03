@@ -58,3 +58,13 @@ create table if not exists public.conteudo_site (
 alter table public.comunicadores enable row level security;
 alter table public.vendas enable row level security;
 alter table public.conteudo_site enable row level security;
+
+-- Arquivo do e-book (PDF), trocável em /admin/site sem precisar de deploy.
+-- Bucket PRIVADO (public = false) e sem nenhuma política de storage criada
+-- — só a service role key consegue ler ou gravar nele, então o PDF nunca
+-- fica acessível direto por URL pública; ele só é servido pela rota
+-- /api/download, depois de reconfirmar o pagamento (ver
+-- src/app/api/download/[id]/route.ts).
+insert into storage.buckets (id, name, public)
+values ('ebooks', 'ebooks', false)
+on conflict (id) do nothing;
